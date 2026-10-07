@@ -1,0 +1,122 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String          @id @default(uuid())
+  name         String
+  email        String          @unique
+  passwordHash String
+  timezone     String          @default("UTC")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  habits       Habit[]
+  insights     AIInsight[]
+  conversations AIConversation[]
+  preferences  UserPreference?
+}
+
+model Habit {
+  id            String            @id @default(uuid())
+  userId        String
+  name          String
+  description   String?
+  frequency     String            @default("daily") // "daily", "weekly", "weekdays"
+  target        Float             @default(1)
+  unit          String            @default("times") // "mins", "pages", "problems", "times", "glasses"
+  preferredTime String?           // "morning", "afternoon", "evening", "anytime"
+  color         String            @default("#6366f1") // hex color token
+  icon          String            @default("activity")
+  category      String            @default("General") // "Health", "Productivity", "Mindfulness", "Learning"
+  startDate     DateTime          @default(now())
+  endDate       DateTime?
+  active        Boolean           @default(true)
+  order         Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions   HabitCompletion[]
+  insights      AIInsight[]
+
+  @@index([userId])
+}
+
+model HabitCompletion {
+  id        String   @id @default(uuid())
+  habitId   String
+  date      String   // Stored in ISO "YYYY-MM-DD" for exact timezone-agnostic day lookups
+  status    String   @default("completed") // "completed", "partial", "missed", "skipped"
+  value     Float    @default(1.0)
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@index([date])
+}
+
+model AIInsight {
+  id          String   @id @default(uuid())
+  userId      String
+  habitId     String?
+  title       String
+  summary     String
+  type        String   @default("insight") // "positive", "warning", "recommendation", "pattern"
+  metric      String?
+  actionable  String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit       Habit?   @relation(fields: [habitId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+model AIConversation {
+  id        String      @id @default(uuid())
+  userId    String
+  title     String      @default("Habit Coach")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AIMessage[]
+
+  @@index([userId])
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  role           String         // "user" or "assistant"
+  content        String
+  structuredData String?        // JSON stringified payload if actionable recommendations or habit proposal
+  createdAt      DateTime       @default(now())
+
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model UserPreference {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  theme             String   @default("light")
+  compactGrid       Boolean  @default(false)
+  soundEffects      Boolean  @default(true)
+  dailyReminderTime String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
