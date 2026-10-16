@@ -98,7 +98,7 @@ export const MonthSelector = () => {
         {/* Today Button - always available */}
         <button
           onClick={jumpToToday}
-          className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors border ${
+          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors border cursor-pointer ${
             isCurrentMonthActive
               ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
               : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
@@ -106,15 +106,6 @@ export const MonthSelector = () => {
           title="Jump to current real-time month"
         >
           Today
-        </button>
-
-        {/* Demo Month Shortcut */}
-        <button
-          onClick={jumpToDemoMonth}
-          className="hidden sm:inline-block px-2 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors"
-          title="Jump to demo seed data (Oct 2026)"
-        >
-          Oct &apos;26
         </button>
       </div>
     </div>

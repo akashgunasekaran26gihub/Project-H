@@ -4,15 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: '#f8fafc',
-        surface: '#ffffff',
-        'surface-muted': '#f1f5f9',
-        border: '#e2e8f0',
-        'text-primary': '#0f172a',
-        'text-secondary': '#64748b',
+        background: 'var(--background)',
+        surface: 'var(--surface)',
+        'surface-muted': 'var(--surface-muted)',
+        border: 'var(--border)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
         success: '#16a34a',
         warning: '#d97706',
         danger: '#dc2626',
@@ -65,3 +66,4 @@ export default {
   },
   plugins: [],
 }
+

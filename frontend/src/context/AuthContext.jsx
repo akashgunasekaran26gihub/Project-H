@@ -49,22 +49,6 @@ export const AuthProvider = ({ children }) => {
     return res.user;
   };
 
-  const loginDemo = async () => {
-    setLoading(true);
-    try {
-      const res = await api.loginDemo();
-      localStorage.setItem('habit_tracker_token', res.token);
-      setToken(res.token);
-      setUser(res.user);
-      return res.user;
-    } catch (err) {
-      console.error('Demo login failed:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const logout = () => {
     localStorage.removeItem('habit_tracker_token');
     setToken(null);
@@ -79,7 +63,6 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: !!user,
       login,
       register,
-      loginDemo,
       logout,
     }}>
       {children}

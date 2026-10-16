@@ -11,13 +11,20 @@ import {
   Trophy,
   Sliders,
   Share2,
-  Crown
+  Crown,
+  DollarSign,
+  Moon,
+  Sun,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useHabits } from '../../context/HabitContext';
 import { useGamification } from '../../context/GamificationContext';
+import { useToast } from '../../context/ToastContext';
 
 export const Navbar = ({
+  currentView = 'tracker',
+  onSelectView,
   onOpenAI,
   onOpenAddHabit,
   onOpenAuth,
@@ -30,35 +37,94 @@ export const Navbar = ({
   const { user, logout, isAuthenticated } = useAuth();
   const { isOffline, offlineQueueCount } = useHabits();
   const { levelInfo } = useGamification();
+  const toast = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      setIsDarkMode(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      setIsDarkMode(false);
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+      setIsDarkMode(true);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-border transition-all">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
         
         {/* Left: Brand Identity */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
-            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className="flex items-center gap-3">
+          <div
+            onClick={() => onSelectView && onSelectView('tracker')}
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-sm sm:text-lg tracking-tight text-text-primary">
+                  Project H
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenPricing();
+                  }}
+                  className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors flex items-center gap-0.5 sm:gap-1 cursor-pointer"
+                  title="View SaaS Pro Subscription"
+                >
+                  <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-700" />
+                  <span>PRO</span>
+                </button>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-text-secondary hidden sm:block">
+                Daily Tracking & Cognitive Analytics
+              </p>
+            </div>
           </div>
-          <div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-extrabold text-sm sm:text-lg tracking-tight text-text-primary">
-                Project H
-              </span>
+
+          {/* View Switcher: Habits Tracker vs Expense History */}
+          {onSelectView && (
+            <div className="hidden sm:flex items-center p-0.5 bg-surface-muted rounded-xl border border-border ml-2">
               <button
-                onClick={onOpenPricing}
-                className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors flex items-center gap-0.5 sm:gap-1 cursor-pointer"
-                title="View SaaS Pro Subscription"
+                onClick={() => onSelectView('tracker')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  currentView === 'tracker'
+                    ? 'bg-surface text-text-primary shadow-xs'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
               >
-                <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-700" />
-                <span>PRO</span>
+                Habits
+              </button>
+              <button
+                onClick={() => onSelectView('expenses')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  currentView === 'expenses'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                <Wallet className="w-3 h-3" />
+                <span>Expenses</span>
               </button>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-text-secondary hidden sm:block">
-              Daily Tracking & Cognitive Analytics
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Right Desktop: Full Executive Nav (hidden on mobile) */}
@@ -125,6 +191,15 @@ export const Navbar = ({
             <Share2 className="w-4 h-4" />
           </button>
 
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-1.5 rounded-xl border border-border text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors"
+            title="Toggle Dark Mode"
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           {/* Settings Button */}
           <button
             onClick={onOpenSettings}
@@ -145,9 +220,12 @@ export const Navbar = ({
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  toast.info('Signed out of Project H.');
+                }}
                 title="Log out"
-                className="p-1.5 text-text-secondary hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors hidden sm:block"
+                className="p-1.5 text-text-secondary hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors hidden sm:block cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -185,13 +263,22 @@ export const Navbar = ({
             <Plus className="w-4 h-4" />
           </button>
 
+          {/* Theme Toggle Mobile */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-1.5 rounded-xl border border-border text-text-primary hover:bg-surface-muted transition-colors"
+            title="Toggle Dark Mode"
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-1.5 rounded-xl border border-border text-text-primary hover:bg-surface-muted transition-colors"
             aria-label="Open Mobile Menu"
           >
-            <Sliders className="w-4 h-4 text-slate-700" />
+            <Sliders className="w-4 h-4 text-slate-700 dark:text-slate-300" />
           </button>
         </div>
 
@@ -215,6 +302,17 @@ export const Navbar = ({
 
           {/* Quick Actions Grid in Mobile Drawer */}
           <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onSelectView && onSelectView(currentView === 'expenses' ? 'tracker' : 'expenses');
+              }}
+              className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-2 font-semibold"
+            >
+              <Wallet className="w-4 h-4 text-emerald-700" />
+              <span>{currentView === 'expenses' ? 'Habits Tracker' : 'Expense History'}</span>
+            </button>
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, Check, X, Plus, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api';
 import { useHabits } from '../../context/HabitContext';
+import { useToast } from '../../context/ToastContext';
 
 const PRESET_COLORS = [
   '#4d7c6f', // pastel sage
@@ -18,6 +19,7 @@ const CATEGORIES = ['Fitness', 'Productivity', 'Learning', 'Mindfulness', 'Healt
 
 export const AddHabitModal = ({ isOpen, onClose, initialData = null }) => {
   const { createHabit } = useHabits();
+  const toast = useToast();
 
   const [tab, setTab] = useState('manual'); // 'manual' or 'ai'
   const [nlPrompt, setNlPrompt] = useState('');
@@ -67,10 +69,11 @@ export const AddHabitModal = ({ isOpen, onClose, initialData = null }) => {
         category: aiProposal.category || 'General',
         color: aiProposal.color || '#4d7c6f',
       });
+      toast.success(`Habit "${aiProposal.name}" created via AI Assistant!`);
       onClose();
       resetForm();
     } catch (err) {
-      alert(err.message || 'Error creating habit');
+      toast.error(err.message || 'Error creating habit');
     }
   };
 
@@ -89,10 +92,11 @@ export const AddHabitModal = ({ isOpen, onClose, initialData = null }) => {
         preferredTime,
         color,
       });
+      toast.success(`Habit "${name}" created successfully!`);
       onClose();
       resetForm();
     } catch (err) {
-      alert(err.message || 'Error creating habit');
+      toast.error(err.message || 'Error creating habit');
     }
   };
 

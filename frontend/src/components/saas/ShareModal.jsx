@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { X, Share2, Copy, Check, Flame, Trophy, Award, Sparkles } from 'lucide-react';
 import { useHabits } from '../../context/HabitContext';
 import { useGamification } from '../../context/GamificationContext';
+import { useToast } from '../../context/ToastContext';
 
 export const ShareModal = ({ isOpen, onClose }) => {
   const { dashboardData } = useHabits();
   const { levelInfo } = useGamification();
+  const toast = useToast();
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !dashboardData) return null;
@@ -17,11 +19,12 @@ export const ShareModal = ({ isOpen, onClose }) => {
     `• Active Streak: ${overallStreaks.currentStreak} Days 🔥\n` +
     `• Level: ${levelInfo.level} (${levelInfo.title})\n` +
     `• Today: ${todayStats.completedCount}/${todayStats.totalActive} Habits Completed ✓\n` +
-    `Built with AI Habit Tracker!`;
+    `Built with Project H!`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareText);
     setCopied(true);
+    toast.success('Accountability summary copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
   };
 

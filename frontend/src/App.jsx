@@ -16,6 +16,8 @@ import ZenZoneModal from './components/zen/ZenZoneModal';
 import PricingModal from './components/saas/PricingModal';
 import SettingsModal from './components/saas/SettingsModal';
 import ShareModal from './components/saas/ShareModal';
+import ExpenseTrackerSection from './components/expenses/ExpenseTrackerSection';
+import ExpenseHistoryPage from './components/expenses/ExpenseHistoryPage';
 import MobileBottomNav from './components/common/MobileBottomNav';
 import AuthScreen from './components/auth/AuthScreen';
 import { useHabits } from './context/HabitContext';
@@ -23,6 +25,7 @@ import { useAuth } from './context/AuthContext';
 
 export function HabitTrackerApp() {
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const [currentView, setCurrentView] = useState('tracker'); // 'tracker' or 'expenses'
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [isAIOpen, setIsAIOpen] = useState(false);
@@ -70,6 +73,8 @@ export function HabitTrackerApp() {
     <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
+        currentView={currentView}
+        onSelectView={(view) => setCurrentView(view)}
         onOpenAI={() => setIsAIOpen(true)}
         onOpenAddHabit={() => setIsAddOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
@@ -80,49 +85,69 @@ export function HabitTrackerApp() {
         onScrollToAchievements={handleScrollToAchievements}
       />
 
-      {/* Main Content Dashboard Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 pb-24 md:pb-8">
-        
-        {/* 1. Month / Year Selector Header */}
-        <MonthSelector />
-
-        {/* 2. Top Summary KPI Cards (Overall Progress, Today, Current Streak, Best Streak) */}
-        <SummaryStatCards />
-
-        {/* 3. Monthly Habit Grid (Spreadsheet & Mobile Daily Focus) */}
-        <div ref={trackerRef}>
-          <HabitGrid
-            onOpenAddHabit={() => setIsAddOpen(true)}
-            onOpenEditHabit={(habit) => setEditingHabit(habit)}
+      {currentView === 'expenses' ? (
+        /* Dedicated Expense Tracker History Page */
+        <div className="flex-1">
+          <ExpenseHistoryPage
+            onBackToDashboard={() => setCurrentView('tracker')}
           />
         </div>
+      ) : (
+        /* Main Habit Consistency Dashboard Area */
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 pb-24 md:pb-8">
+          
+          {/* 1. Month / Year Selector Header */}
+          <MonthSelector />
 
-        {/* 4. Weekly Progress Cards (5 calendar weeks with pastel tokens and progress rings) */}
-        <div ref={analyticsRef}>
-          <WeeklyProgressCards />
-        </div>
+          {/* 2. Top Summary KPI Cards (Overall Progress, Today, Current Streak, Best Streak) */}
+          <SummaryStatCards />
 
-        {/* 5. Daily & Weekly Achievements & Gamification Section */}
-        <div ref={achievementsRef}>
-          <AchievementsPanel />
-        </div>
+          {/* 3. Monthly Habit Grid (Spreadsheet & Mobile Daily Focus) */}
+          <div ref={trackerRef}>
+            <HabitGrid
+              onOpenAddHabit={() => setIsAddOpen(true)}
+              onOpenEditHabit={(habit) => setEditingHabit(habit)}
+            />
+          </div>
 
-        {/* 6. Progress Charts (Monthly trend line & Habit comparison bar charts) */}
-        <ChartsSection />
+          {/* Expense Tracker Section placed immediately below Monthly Project H grid */}
+          <div className="mt-6 sm:mt-8">
+            <ExpenseTrackerSection
+              onViewExpenseHistory={() => setCurrentView('expenses')}
+            />
+          </div>
 
-        {/* 7. AI Insights Section (Pattern detection, daily briefing, recommendations) */}
-        <AIInsightsSection onOpenAI={() => setIsAIOpen(true)} />
+          {/* 4. Weekly Progress Cards (5 calendar weeks with pastel tokens and progress rings) */}
+          <div ref={analyticsRef}>
+            <WeeklyProgressCards />
+          </div>
 
-        {/* 8. Lifetime Statistics */}
-        <LifetimeStatsSection />
+          {/* 5. Daily & Weekly Achievements & Gamification Section */}
+          <div ref={achievementsRef}>
+            <AchievementsPanel />
+          </div>
 
-      </main>
+          {/* 6. Progress Charts (Monthly trend line & Habit comparison bar charts) */}
+          <ChartsSection />
+
+          {/* 7. AI Insights Section (Pattern detection, daily briefing, recommendations) */}
+          <AIInsightsSection onOpenAI={() => setIsAIOpen(true)} />
+
+          {/* 8. Lifetime Statistics */}
+          <LifetimeStatsSection />
+
+        </main>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface py-6 pb-20 md:pb-6 text-center text-xs text-text-secondary">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Project H Pro • Built for high consistency & behavioral momentum</span>
           <div className="flex items-center gap-3">
+            <button onClick={() => setCurrentView('tracker')} className={`hover:text-text-primary ${currentView === 'tracker' ? 'font-bold text-text-primary' : ''}`}>Tracker</button>
+            <span>•</span>
+            <button onClick={() => setCurrentView('expenses')} className={`hover:text-text-primary ${currentView === 'expenses' ? 'font-bold text-emerald-600' : ''}`}>Expense History</button>
+            <span>•</span>
             <button onClick={() => setIsPricingOpen(true)} className="hover:text-text-primary">SaaS Plans</button>
             <span>•</span>
             <button onClick={() => setIsZenOpen(true)} className="hover:text-text-primary">Zen Zone</button>
@@ -134,11 +159,19 @@ export function HabitTrackerApp() {
 
       {/* Mobile Bottom Navigation Bar (Visible only on phone/mobile screens) */}
       <MobileBottomNav
-        activeTab={mobileTab}
-        onSelectTab={handleSelectMobileTab}
+        activeTab={currentView === 'expenses' ? 'expenses' : mobileTab}
+        onSelectTab={(tab) => {
+          if (tab === 'expenses') {
+            setCurrentView('expenses');
+          } else {
+            setCurrentView('tracker');
+            handleSelectMobileTab(tab);
+          }
+        }}
         onOpenAddHabit={() => setIsAddOpen(true)}
         onOpenZen={() => setIsZenOpen(true)}
         onOpenAI={() => setIsAIOpen(true)}
+        onOpenExpenses={() => setCurrentView('expenses')}
       />
 
       {/* Modals & Slide-out Drawers */}

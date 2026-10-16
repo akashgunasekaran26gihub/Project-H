@@ -17,6 +17,8 @@ import {
   Calendar
 } from 'lucide-react';
 import { useHabits } from '../../context/HabitContext';
+import { useToast } from '../../context/ToastContext';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 const WEEK_COLORS = {
   1: { header: 'bg-teal-50/60 text-teal-900 border-teal-200/60', label: 'W1' },
@@ -48,6 +50,7 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
     refreshing,
     seedStarterHabits,
   } = useHabits();
+  const toast = useToast();
 
   const todayDay = new Date().getDate();
   const isCurrentMonth = new Date().getFullYear() === year && new Date().getMonth() + 1 === month;
@@ -58,6 +61,7 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
     typeof window !== 'undefined' && window.innerWidth < 768 ? 'mobile-today' : 'grid'
   );
   const [activeMenuHabitId, setActiveMenuHabitId] = useState(null);
+  const [habitToDelete, setHabitToDelete] = useState(null);
 
   React.useEffect(() => {
     const isNow = new Date().getFullYear() === year && new Date().getMonth() + 1 === month;
@@ -431,19 +435,13 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                       🌱
                     </div>
                     <p className="font-extrabold text-sm text-text-primary">Your tracker is clean and ready</p>
-                    <p className="text-xs text-text-secondary mt-1">Start fresh with your own custom habits or load 3 starter habits.</p>
+                    <p className="text-xs text-text-secondary mt-1">Start fresh by creating your first daily or weekly habit.</p>
                     <div className="flex items-center justify-center gap-2 mt-4">
                       <button
                         onClick={onOpenAddHabit}
-                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs"
+                        className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
                       >
                         + Create First Habit
-                      </button>
-                      <button
-                        onClick={seedStarterHabits}
-                        className="px-3.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-colors"
-                      >
-                        ✨ Seed 3 Starter Habits
                       </button>
                     </div>
                   </td>
@@ -508,11 +506,9 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                               <button
                                 onClick={() => {
                                   setActiveMenuHabitId(null);
-                                  if (confirm(`Delete habit "${habit.name}"?`)) {
-                                    deleteHabit(habit.id);
-                                  }
+                                  setHabitToDelete(habit);
                                 }}
-                                className="w-full px-3 py-1.5 text-left text-danger hover:bg-red-50 flex items-center gap-2"
+                                className="w-full px-3 py-1.5 text-left text-danger hover:bg-red-50 flex items-center gap-2 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5 text-danger" />
                                 <span>Delete</span>
@@ -576,6 +572,28 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
           </table>
         </div>
       )}
+
+      {/* Deletion Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!habitToDelete}
+        onClose={() => setHabitToDelete(null)}
+        onConfirm={async () => {
+          if (habitToDelete) {
+            try {
+              await deleteHabit(habitToDelete.id);
+              toast.success(`Habit "${habitToDelete.name}" deleted.`);
+            } catch (err) {
+              toast.error('Failed to delete habit.');
+            } finally {
+              setHabitToDelete(null);
+            }
+          }
+        }}
+        title={`Delete "${habitToDelete?.name}"?`}
+        message="This will permanently delete this habit and all its recorded daily completions. This action cannot be undone."
+        confirmText="Delete Habit"
+        variant="danger"
+      />
     </div>
   );
 };

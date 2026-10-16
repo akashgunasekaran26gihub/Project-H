@@ -5,15 +5,21 @@ import './index.css';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { HabitProvider } from './context/HabitContext.jsx';
 import { GamificationProvider } from './context/GamificationContext.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
+import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <GamificationProvider>
-        <HabitProvider>
-          <App />
-        </HabitProvider>
-      </GamificationProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <GamificationProvider>
+            <HabitProvider>
+              <App />
+            </HabitProvider>
+          </GamificationProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

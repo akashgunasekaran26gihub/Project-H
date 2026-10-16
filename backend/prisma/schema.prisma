@@ -20,6 +20,7 @@ model User {
   insights     AIInsight[]
   conversations AIConversation[]
   preferences  UserPreference?
+  expenses     Expense[]
 }
 
 model Habit {
@@ -119,4 +120,20 @@ model UserPreference {
   updatedAt         DateTime @updatedAt
 
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Float
+  category    String   @default("General")
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
 }

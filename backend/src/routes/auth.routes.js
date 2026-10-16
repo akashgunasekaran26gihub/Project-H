@@ -87,36 +87,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Demo/Guest Quick Login (Convenient 1-click test button)
-router.post('/demo', async (req, res) => {
-  try {
-    let demoUser = await prisma.user.findUnique({
-      where: { email: 'demo@habittracker.app' },
-      select: { id: true, name: true, email: true, timezone: true }
-    });
-
-    if (!demoUser) {
-      const passwordHash = await bcrypt.hash('DemoPassword123!', 10);
-      demoUser = await prisma.user.create({
-        data: {
-          name: 'Alex Mercer',
-          email: 'demo@habittracker.app',
-          passwordHash,
-          timezone: 'UTC',
-          preferences: { create: { theme: 'light' } }
-        },
-        select: { id: true, name: true, email: true, timezone: true }
-      });
-    }
-
-    const token = jwt.sign({ id: demoUser.id, email: demoUser.email, name: demoUser.name }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ user: demoUser, token });
-  } catch (error) {
-    console.error('Demo login error:', error);
-    res.status(500).json({ message: 'Could not log in as demo user' });
-  }
-});
-
 // Current User Profile
 router.get('/me', authenticate, async (req, res) => {
   res.json({ user: req.user });

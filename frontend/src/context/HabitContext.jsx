@@ -20,11 +20,6 @@ export const HabitProvider = ({ children }) => {
     setMonth(today.getMonth() + 1);
   };
 
-  const jumpToDemoMonth = () => {
-    setYear(2026);
-    setMonth(10);
-  };
-
   // Core Data States
   const [dashboardData, setDashboardData] = useState(null);
   const [lifetimeData, setLifetimeData] = useState(null);
@@ -294,7 +289,6 @@ export const HabitProvider = ({ children }) => {
       nextMonth,
       prevMonth,
       jumpToToday,
-      jumpToDemoMonth,
       seedStarterHabits,
       dashboardData,
       lifetimeData,

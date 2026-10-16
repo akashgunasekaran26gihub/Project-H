@@ -5,7 +5,9 @@ import {
   Trophy,
   Wind,
   Sparkles,
-  Plus
+  Plus,
+  DollarSign,
+  Wallet
 } from 'lucide-react';
 
 export const MobileBottomNav = ({
@@ -14,6 +16,7 @@ export const MobileBottomNav = ({
   onOpenAddHabit,
   onOpenZen,
   onOpenAI,
+  onOpenExpenses,
 }) => {
   return (
     <nav
@@ -28,68 +31,58 @@ export const MobileBottomNav = ({
           onClick={() => onSelectTab('tracker')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
             activeTab === 'tracker'
-              ? 'text-slate-900 font-bold'
+              ? 'text-slate-900 dark:text-white font-bold'
               : 'text-text-secondary hover:text-text-primary'
           }`}
         >
-          <CheckCircle2 className={`w-5 h-5 ${activeTab === 'tracker' ? 'stroke-[2.5px] text-slate-900' : ''}`} />
+          <CheckCircle2 className={`w-5 h-5 ${activeTab === 'tracker' ? 'stroke-[2.5px] text-slate-900 dark:text-white' : ''}`} />
           <span className="text-[10px] mt-0.5">Tracker</span>
         </button>
 
-        {/* 2. Weekly & Analytics */}
+        {/* 2. Expenses History */}
         <button
-          onClick={() => onSelectTab('analytics')}
+          onClick={() => onSelectTab('expenses')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-            activeTab === 'analytics'
-              ? 'text-slate-900 font-bold'
+            activeTab === 'expenses'
+              ? 'text-emerald-600 font-bold'
               : 'text-text-secondary hover:text-text-primary'
           }`}
         >
-          <BarChart2 className={`w-5 h-5 ${activeTab === 'analytics' ? 'stroke-[2.5px] text-slate-900' : ''}`} />
-          <span className="text-[10px] mt-0.5">Trends</span>
+          <Wallet className={`w-5 h-5 ${activeTab === 'expenses' ? 'stroke-[2.5px] text-emerald-600' : ''}`} />
+          <span className="text-[10px] mt-0.5">Expenses</span>
         </button>
 
         {/* 3. Center Quick Add Action */}
         <button
           onClick={onOpenAddHabit}
-          className="flex items-center justify-center -mt-4 w-11 h-11 rounded-full bg-slate-900 text-white shadow-md active:scale-95 transition-transform"
+          className="flex items-center justify-center -mt-4 w-11 h-11 rounded-full bg-slate-900 dark:bg-indigo-600 text-white shadow-md active:scale-95 transition-transform"
           title="Add New Habit"
           aria-label="Add Habit"
         >
           <Plus className="w-5 h-5 stroke-[2.5px]" />
         </button>
 
-        {/* 4. Achievements */}
+        {/* 4. Weekly & Analytics */}
         <button
-          onClick={() => onSelectTab('achievements')}
+          onClick={() => onSelectTab('analytics')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-            activeTab === 'achievements'
-              ? 'text-slate-900 font-bold'
+            activeTab === 'analytics'
+              ? 'text-slate-900 dark:text-white font-bold'
               : 'text-text-secondary hover:text-text-primary'
           }`}
         >
-          <Trophy className={`w-5 h-5 ${activeTab === 'achievements' ? 'stroke-[2.5px] text-amber-600' : ''}`} />
-          <span className="text-[10px] mt-0.5">Badges</span>
+          <BarChart2 className={`w-5 h-5 ${activeTab === 'analytics' ? 'stroke-[2.5px] text-slate-900 dark:text-white' : ''}`} />
+          <span className="text-[10px] mt-0.5">Trends</span>
         </button>
 
-        {/* 5. Zen Zone */}
-        <button
-          onClick={onOpenZen}
-          className="flex flex-col items-center justify-center flex-1 py-1 text-teal-800 transition-colors"
-          title="Zen Zone"
-        >
-          <Wind className="w-5 h-5 text-teal-700" />
-          <span className="text-[10px] mt-0.5 font-medium">Zen</span>
-        </button>
-
-        {/* 6. AI Coach */}
+        {/* 5. AI Coach */}
         <button
           onClick={onOpenAI}
-          className="flex flex-col items-center justify-center flex-1 py-1 text-indigo-700 transition-colors"
+          className="flex flex-col items-center justify-center flex-1 py-1 text-indigo-700 dark:text-indigo-400 transition-colors"
           title="AI Coach"
         >
-          <Sparkles className="w-5 h-5 text-indigo-600" />
-          <span className="text-[10px] mt-0.5 font-medium">AI</span>
+          <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <span className="text-[10px] mt-0.5 font-medium">AI Coach</span>
         </button>
 
       </div>

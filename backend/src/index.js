@@ -14,6 +14,7 @@ import analyticsRoutes from './routes/analytics.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import userRoutes from './routes/user.routes.js';
 import billingRoutes from './routes/billing.routes.js';
+import expensesRoutes from './routes/expenses.routes.js';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/expenses', expensesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

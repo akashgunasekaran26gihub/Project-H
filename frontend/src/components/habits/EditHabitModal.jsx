@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import { useHabits } from '../../context/HabitContext';
+import { useToast } from '../../context/ToastContext';
 
 const PRESET_COLORS = [
   '#4d7c6f', // pastel sage
@@ -16,6 +17,7 @@ const CATEGORIES = ['Fitness', 'Productivity', 'Learning', 'Mindfulness', 'Healt
 
 export const EditHabitModal = ({ habit, isOpen, onClose }) => {
   const { updateHabit } = useHabits();
+  const toast = useToast();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('General');
@@ -53,9 +55,10 @@ export const EditHabitModal = ({ habit, isOpen, onClose }) => {
         preferredTime,
         color,
       });
+      toast.success(`Habit "${name}" updated successfully.`);
       onClose();
     } catch (err) {
-      alert(err.message || 'Error updating habit');
+      toast.error(err.message || 'Error updating habit');
     }
   };
 

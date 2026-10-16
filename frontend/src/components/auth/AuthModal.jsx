@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
+import { X, Lock, Mail, User, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export const AuthModal = ({ isOpen, onClose }) => {
-  const { login, register } = useAuth();
+  const { login, register, loginDemo } = useAuth();
+  const toast = useToast();
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -11,6 +13,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -21,26 +24,18 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       if (isRegister) {
-        await register(name, email, password);
+        if (!name.trim()) throw new Error('Please enter your name');
+        await register(name.trim(), email.trim(), password);
+        toast.success(`Account created! Welcome, ${name}.`);
       } else {
-        await login(email, password);
+        await login(email.trim(), password);
+        toast.success('Signed in successfully.');
       }
       onClose();
     } catch (err) {
-      setError(err.message || 'Authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoClick = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      await loginDemo();
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Demo login failed');
+      const msg = err.message || 'Authentication failed';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -50,18 +45,19 @@ export const AuthModal = ({ isOpen, onClose }) => {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
     >
-      <div className="bg-surface rounded-2xl border border-border shadow-2xl max-w-sm w-full p-6 relative">
+      <div className="bg-surface rounded-3xl border border-border shadow-2xl max-w-sm w-full p-6 relative">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-1 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-muted"
+          className="absolute right-4 top-4 p-1.5 text-text-secondary hover:text-text-primary rounded-xl hover:bg-surface-muted transition-colors"
+          aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-5">
-          <div className="w-10 h-10 rounded-xl bg-accent text-white flex items-center justify-center mx-auto mb-2 shadow-sm font-bold text-lg">
+          <div className="w-11 h-11 rounded-2xl bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center mx-auto mb-2 shadow-sm font-bold text-lg">
             ✓
           </div>
           <h3 className="font-extrabold text-lg text-text-primary">
@@ -73,7 +69,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
         </div>
 
         {error && (
-          <div className="p-2.5 mb-4 bg-red-50 text-red-600 rounded-xl text-xs border border-red-200">
+          <div className="p-2.5 mb-4 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-xl text-xs border border-rose-200 dark:border-rose-900 leading-snug">
             {error}
           </div>
         )}
@@ -90,7 +86,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   placeholder="Alex Mercer"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
@@ -106,7 +102,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                 placeholder="alex@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -121,7 +117,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-9 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none"
+                className="w-full pl-9 pr-9 py-2 rounded-xl bg-surface-muted border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <button
                 type="button"
@@ -141,10 +137,11 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-sm mt-2"
+            disabled={loading || demoLoading}
+            className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white font-bold hover:opacity-90 disabled:opacity-50 transition-colors shadow-xs mt-2 flex items-center justify-center gap-1.5"
           >
             {loading ? 'Processing...' : isRegister ? 'Register Account' : 'Sign In'}
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
 
@@ -155,7 +152,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
               setIsRegister(!isRegister);
               setError('');
             }}
-            className="text-xs text-text-secondary hover:text-accent font-semibold"
+            className="text-xs text-text-secondary hover:text-text-primary font-semibold"
           >
             {isRegister
               ? 'Already have an account? Sign in'

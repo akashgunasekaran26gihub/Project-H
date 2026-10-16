@@ -92,8 +92,6 @@ export const api = {
     request('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
   login: (email, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  loginDemo: () =>
-    request('/auth/demo', { method: 'POST' }),
   getMe: () =>
     request('/auth/me'),
 
@@ -142,4 +140,40 @@ export const api = {
     request('/ai/insights'),
   askAssistant: (query, conversationId) =>
     request('/ai/chat', { method: 'POST', body: JSON.stringify({ query, conversationId }) }),
+
+  // Expenses
+  getExpenseSummary: () =>
+    request('/expenses/summary'),
+  getExpenses: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.category && params.category !== 'All') query.append('category', params.category);
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const queryString = query.toString();
+    return request(`/expenses${queryString ? `?${queryString}` : ''}`);
+  },
+  addExpense: (expenseData) =>
+    request('/expenses', { method: 'POST', body: JSON.stringify(expenseData) }),
+  updateExpense: (id, expenseData) =>
+    request(`/expenses/${id}`, { method: 'PUT', body: JSON.stringify(expenseData) }),
+  deleteExpense: (id) =>
+    request(`/expenses/${id}`, { method: 'DELETE' }),
+
+  // User Profile & Settings
+  getProfile: () =>
+    request('/user/profile'),
+  updateProfile: (profileData) =>
+    request('/user/profile', { method: 'PUT', body: JSON.stringify(profileData) }),
+  changePassword: (currentPassword, newPassword) =>
+    request('/user/password', { method: 'PUT', body: JSON.stringify({ currentPassword, newPassword }) }),
+  deleteAccount: () =>
+    request('/user/account', { method: 'DELETE' }),
+
+  // Subscription & SaaS Billing
+  getSubscription: () =>
+    request('/billing/subscription'),
+  createCheckoutSession: (planId, interval) =>
+    request('/billing/create-checkout-session', { method: 'POST', body: JSON.stringify({ planId, interval }) }),
+  cancelSubscription: () =>
+    request('/billing/cancel-subscription', { method: 'POST' }),
 };
