@@ -108,7 +108,18 @@ export const AuthScreen = () => {
           {error && (
             <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-start gap-2">
               <span className="font-bold flex-shrink-0">✕</span>
-              <span className="leading-snug">{error}</span>
+              <div className="flex-1 leading-snug">
+                <span>{error}</span>
+                {error.toLowerCase().includes('already exists') && (
+                  <button
+                    type="button"
+                    onClick={() => { setIsRegister(false); setError(''); }}
+                    className="block mt-1.5 font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    Switch to Sign In →
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

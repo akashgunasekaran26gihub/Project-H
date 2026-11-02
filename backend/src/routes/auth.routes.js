@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import prisma from '../config/db.js';
+import prisma, { ensureDatabaseReady } from '../config/db.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -22,6 +22,8 @@ const loginSchema = z.object({
 // Register
 router.post('/register', async (req, res) => {
   try {
+    await ensureDatabaseReady();
+
     const parse = registerSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ message: parse.error.errors[0].message });
@@ -53,13 +55,15 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ user, token });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Internal server error during registration' });
+    res.status(500).json({ message: error.message || 'Internal server error during registration', error: error.message });
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
   try {
+    await ensureDatabaseReady();
+
     const parse = loginSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ message: parse.error.errors[0].message });
@@ -83,7 +87,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Internal server error during login' });
+    res.status(500).json({ message: error.message || 'Internal server error during login', error: error.message });
   }
 });
 
