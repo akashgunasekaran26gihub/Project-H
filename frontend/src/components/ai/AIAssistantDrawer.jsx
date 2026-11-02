@@ -179,13 +179,13 @@ export const AIAssistantDrawer = ({ isOpen, onClose, onPreFillHabit }) => {
           ))}
         </div>
 
-        {/* Input Form */}
+        {/* Input Form with Mobile Safe Area Support */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="p-3 border-t border-border bg-surface flex items-center gap-2"
+          className="p-3 pb-safe border-t border-border bg-surface flex items-center gap-2"
         >
           <input
             type="text"

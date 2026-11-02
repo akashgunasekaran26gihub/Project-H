@@ -65,7 +65,7 @@ export const Navbar = ({
 
   return (
     <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-border transition-all">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+      <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
         
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
@@ -128,12 +128,12 @@ export const Navbar = ({
         </div>
 
         {/* Right Desktop: Full Executive Nav (hidden on mobile) */}
-        <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
+        <div className="hidden md:flex items-center gap-1.5 lg:gap-2.5">
           
           {/* Level / XP Pill */}
           <button
             onClick={onScrollToAchievements}
-            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors"
+            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors"
             title="View Daily & Weekly Achievements"
           >
             <Trophy className="w-3.5 h-3.5 text-amber-600" />
@@ -147,17 +147,17 @@ export const Navbar = ({
             title="Open Mind Relaxing Tools & Breathing Orb"
           >
             <Wind className="w-3.5 h-3.5 text-teal-700" />
-            <span>Zen Zone</span>
+            <span className="hidden lg:inline">Zen Zone</span>
           </button>
 
           {/* Offline/Online status */}
           {isOffline ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 text-xs border border-amber-200 font-medium">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-50 text-amber-800 text-xs border border-amber-200 font-medium">
               <WifiOff className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">({offlineQueueCount} unsynced)</span>
+              <span className="hidden lg:inline">({offlineQueueCount})</span>
             </div>
           ) : (
-            <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 font-medium">
+            <div className="hidden 2xl:flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 font-medium">
               <Wifi className="w-3.5 h-3.5 text-emerald-600" />
               <span>Synced</span>
             </div>
@@ -166,11 +166,11 @@ export const Navbar = ({
           {/* AI Coach Action Button */}
           <button
             onClick={onOpenAI}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition-colors"
             title="Open AI Habit Coach"
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>AI Coach</span>
+            <span className="hidden lg:inline">AI Coach</span>
           </button>
 
           {/* Quick Add Habit Button */}
@@ -179,7 +179,7 @@ export const Navbar = ({
             className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add Habit</span>
+            <span className="hidden sm:inline">Add Habit</span>
           </button>
 
           {/* Share Progress Button */}

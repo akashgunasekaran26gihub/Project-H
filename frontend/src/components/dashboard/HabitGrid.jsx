@@ -37,6 +37,7 @@ const getWeekForDay = (day) => {
 };
 
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
   const {
@@ -143,75 +144,89 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
           </p>
         </div>
 
-        {/* Toolbar & Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Mode switch for all screen sizes */}
-          <div className="flex items-center bg-surface-muted p-0.5 rounded-lg border border-border">
-            <button
-              onClick={() => setViewMode('mobile-today')}
-              className={`px-2.5 py-1 text-xs rounded-md font-bold transition-all ${viewMode === 'mobile-today' ? 'bg-surface text-text-primary shadow-xs' : 'text-text-secondary'}`}
-            >
-              Focus View
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-2.5 py-1 text-xs rounded-md font-bold transition-all ${viewMode === 'grid' ? 'bg-surface text-text-primary shadow-xs' : 'text-text-secondary'}`}
-            >
-              Full Grid
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="relative flex-1 sm:flex-initial">
-            <Search className="w-3.5 h-3.5 text-text-secondary absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-2.5 py-1.5 rounded-lg text-xs bg-surface-muted border border-border text-text-primary focus:outline-none focus:ring-1 focus:ring-accent w-full sm:w-40"
-            />
-          </div>
-
-          {/* Category Dropdown (mobile) & Pills (desktop) */}
-          <div className="block md:hidden">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="py-1.5 px-2 rounded-lg text-xs bg-surface-muted border border-border text-text-primary focus:outline-none"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="hidden md:flex items-center gap-1 bg-surface-muted p-0.5 rounded-lg border border-border">
-            {categories.map((cat) => (
+        {/* Toolbar & Filters (Responsive 2-row on mobile, 1-row on tablet & desktop) */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full md:w-auto">
+          {/* Top row on mobile: Mode toggle + Add button */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center bg-surface-muted p-0.5 rounded-lg border border-border">
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                  selectedCategory === cat
-                    ? 'bg-surface text-text-primary shadow-xs font-semibold'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
+                onClick={() => setViewMode('mobile-today')}
+                className={`px-2.5 py-1 text-xs rounded-md font-bold transition-all ${viewMode === 'mobile-today' ? 'bg-surface text-text-primary shadow-xs' : 'text-text-secondary'}`}
               >
-                {cat}
+                Focus View
               </button>
-            ))}
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-2.5 py-1 text-xs rounded-md font-bold transition-all ${viewMode === 'grid' ? 'bg-surface text-text-primary shadow-xs' : 'text-text-secondary'}`}
+              >
+                Full Grid
+              </button>
+            </div>
+
+            {/* Mobile quick add button */}
+            <button
+              onClick={onOpenAddHabit}
+              className="sm:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add</span>
+            </button>
           </div>
 
-          {/* Add Habit Button */}
-          <button
-            onClick={onOpenAddHabit}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Add Habit</span>
-          </button>
+          {/* Search, category filter & desktop Add button */}
+          <div className="flex items-center gap-2 flex-1">
+            <div className="relative flex-1 sm:w-44 md:w-48">
+              <Search className="w-3.5 h-3.5 text-text-secondary absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search habits..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 pr-2.5 py-1.5 rounded-lg text-xs bg-surface-muted border border-border text-text-primary focus:outline-none focus:ring-1 focus:ring-accent w-full"
+              />
+            </div>
+
+            {/* Category Dropdown (mobile & tablet) */}
+            <div className="block lg:hidden flex-shrink-0">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="py-1.5 px-2 rounded-lg text-xs bg-surface-muted border border-border text-text-primary focus:outline-none cursor-pointer"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Category Pills (desktop xl/2xl) */}
+            <div className="hidden lg:flex items-center gap-1 bg-surface-muted p-0.5 rounded-lg border border-border flex-shrink-0">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                    selectedCategory === cat
+                      ? 'bg-surface text-text-primary shadow-xs font-semibold'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop Add Habit Button */}
+            <button
+              onClick={onOpenAddHabit}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs flex-shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Habit</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -363,7 +378,7 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
             <thead>
               {/* Row 1: Week grouping label bands with pastel themes */}
               <tr className="border-b border-border text-[11px] font-semibold text-center">
-                <th className="sticky left-0 z-20 bg-surface px-2.5 sm:px-4 py-2 text-left font-bold text-text-secondary border-r border-border min-w-[130px] sm:min-w-[200px]">
+                <th className="sticky left-0 z-20 bg-surface px-2.5 sm:px-4 py-2 text-left font-bold text-text-secondary border-r border-border min-w-[125px] sm:min-w-[190px] 2xl:min-w-[220px]">
                   HABIT
                 </th>
                 {/* Week Bands matching reference */}
@@ -382,17 +397,17 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                 <th colSpan={daysInMonth - 28} className={`py-1 border-r border-border ${WEEK_COLORS[5].header}`}>
                   WEEK 5 (Days 29–{daysInMonth})
                 </th>
-                <th className="px-3 py-1 bg-surface font-bold text-text-secondary min-w-[80px]">
+                <th className="px-2.5 sm:px-3 py-1 bg-surface font-bold text-text-secondary min-w-[70px] sm:min-w-[80px]">
                   TOTAL
                 </th>
               </tr>
 
               {/* Row 2: Individual Day Numbers (1 to 31) and Day of Week letters */}
               <tr className="border-b border-border text-[11px] font-bold text-center bg-surface-muted/60">
-                <th className="sticky left-0 z-20 bg-surface px-2.5 sm:px-4 py-2 text-left text-xs font-bold text-text-secondary border-r border-border min-w-[130px] sm:min-w-[200px]">
+                <th className="sticky left-0 z-20 bg-surface px-2.5 sm:px-4 py-2 text-left text-xs font-bold text-text-secondary border-r border-border min-w-[125px] sm:min-w-[190px] 2xl:min-w-[220px]">
                   <div className="flex items-center justify-between">
                     <span>{filteredHabits.length} habits</span>
-                    <span className="text-[10px] font-normal text-text-secondary hidden sm:inline">Oct {year}</span>
+                    <span className="text-[10px] font-normal text-text-secondary hidden sm:inline">{MONTH_SHORT[month - 1]} {year}</span>
                   </div>
                 </th>
 
@@ -407,7 +422,7 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                   return (
                     <th
                       key={day}
-                      className={`px-1 py-1.5 min-w-[32px] max-w-[36px] text-center border-r border-border/60 transition-colors ${
+                      className={`px-0.5 sm:px-1 py-1.5 min-w-[32px] sm:min-w-[34px] 2xl:min-w-[38px] max-w-[36px] 2xl:max-w-[42px] text-center border-r border-border/60 transition-colors ${
                         isToday ? 'bg-indigo-50 border-x-2 border-indigo-400' : isWeekend ? 'bg-slate-100/50' : ''
                       }`}
                     >
@@ -421,7 +436,7 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                   );
                 })}
 
-                <th className="px-3 py-2 text-center text-xs font-bold text-text-secondary">
+                <th className="px-2.5 sm:px-3 py-2 text-center text-xs font-bold text-text-secondary min-w-[70px] sm:min-w-[80px]">
                   RATE
                 </th>
               </tr>
@@ -453,16 +468,16 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                     className="hover:bg-slate-50/70 transition-colors group"
                   >
                     {/* Sticky Habit Info Column */}
-                    <td className="sticky left-0 z-10 bg-surface group-hover:bg-slate-50/90 px-2.5 sm:px-4 py-2 sm:py-2.5 border-r border-border sticky-column-shadow min-w-[130px] sm:min-w-[200px]">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
+                    <td className="sticky left-0 z-10 bg-surface group-hover:bg-slate-50/90 px-2 sm:px-4 py-2 sm:py-2.5 border-r border-border sticky-column-shadow min-w-[125px] sm:min-w-[190px] 2xl:min-w-[220px]">
+                      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                           {/* Color Dot Indicator */}
                           <div
                             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                             style={{ backgroundColor: habit.color }}
                           />
                           <div className="truncate">
-                            <span className="font-bold text-text-primary text-xs truncate block max-w-[85px] sm:max-w-none">
+                            <span className="font-bold text-text-primary text-xs truncate block max-w-[80px] xs:max-w-[100px] sm:max-w-none" title={habit.name}>
                               {habit.name}
                             </span>
                             <span className="text-[10px] text-text-secondary block truncate">
@@ -472,10 +487,10 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                         </div>
 
                         {/* Action Dropdown Trigger */}
-                        <div className="relative flex items-center">
+                        <div className="relative flex items-center flex-shrink-0">
                           <button
                             onClick={() => setActiveMenuHabitId(activeMenuHabitId === habit.id ? null : habit.id)}
-                            className="p-1 rounded text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1 rounded text-text-secondary hover:text-text-primary hover:bg-surface-muted transition-colors opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
                             title="Habit Options"
                           >
                             <MoreVertical className="w-3.5 h-3.5" />

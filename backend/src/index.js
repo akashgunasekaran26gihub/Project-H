@@ -88,9 +88,10 @@ if (fs.existsSync(frontendDistPath)) {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
-  res.status(500).json({ message: 'Internal server error', error: err.message });
+  const status = typeof err.status === 'number' ? err.status : (typeof err.statusCode === 'number' ? err.statusCode : 500);
+  res.status(status).json({ message: err.message || 'Internal server error', error: err.message });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Habit Tracker SaaS Backend running at http://localhost:${PORT}`);
 });

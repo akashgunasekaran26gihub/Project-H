@@ -64,13 +64,13 @@ export const SummaryStatCards = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-4 sm:mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mb-4 sm:mb-6">
       {cards.map((c) => {
         const IconComponent = c.icon;
         return (
           <div
             key={c.id}
-            className="bg-surface p-3 sm:p-5 rounded-2xl border border-border shadow-2xs flex items-center justify-between hover:border-slate-300 transition-all"
+            className="bg-surface p-3 sm:p-4 lg:p-5 rounded-2xl border border-border shadow-2xs flex items-center justify-between hover:border-slate-300 transition-all"
           >
             <div className="min-w-0 pr-1">
               <div className="flex items-center gap-1 sm:gap-1.5 mb-1">
@@ -83,7 +83,7 @@ export const SummaryStatCards = () => {
                   </span>
                 )}
               </div>
-              <div className="text-xl sm:text-3xl font-extrabold text-text-primary tracking-tight truncate">
+              <div className="text-xl sm:text-2xl 2xl:text-3xl font-extrabold text-text-primary tracking-tight truncate">
                 {c.value}
               </div>
               <div className="text-[10px] sm:text-xs text-text-secondary mt-0.5 truncate">

@@ -120,6 +120,7 @@ export const ChartsSection = () => {
                 fontSize={9}
                 tickLine={false}
                 interval={0}
+                tickFormatter={(val) => (val && val.length > 8 ? `${val.slice(0, 7)}…` : val)}
               />
               <YAxis
                 stroke="#94a3b8"

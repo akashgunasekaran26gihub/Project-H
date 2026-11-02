@@ -94,7 +94,7 @@ export function HabitTrackerApp() {
         </div>
       ) : (
         /* Main Habit Consistency Dashboard Area */
-        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 pb-24 md:pb-8">
+        <main className="flex-1 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6 pb-28 md:pb-10 transition-all">
           
           {/* 1. Month / Year Selector Header */}
           <MonthSelector />
@@ -140,8 +140,8 @@ export function HabitTrackerApp() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-border bg-surface py-6 pb-20 md:pb-6 text-center text-xs text-text-secondary">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="border-t border-border bg-surface py-6 pb-24 md:pb-6 text-center text-xs text-text-secondary">
+        <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Project H Pro • Built for high consistency & behavioral momentum</span>
           <div className="flex items-center gap-3">
             <button onClick={() => setCurrentView('tracker')} className={`hover:text-text-primary ${currentView === 'tracker' ? 'font-bold text-text-primary' : ''}`}>Tracker</button>

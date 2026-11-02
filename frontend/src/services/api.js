@@ -33,10 +33,16 @@ async function request(endpoint, options = {}) {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
+      if (res.status === 500 && !data.message) {
+        throw new Error('Backend server is unreachable. Please verify backend is running at http://localhost:5001');
+      }
       throw new Error(data.message || `Request failed with status ${res.status}`);
     }
     return data;
   } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Cannot reach backend server. Please verify backend is running at http://localhost:5001');
+    }
     throw error;
   }
 }

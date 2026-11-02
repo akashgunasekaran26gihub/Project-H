@@ -297,7 +297,7 @@ export const ExpenseHistoryPage = ({ onBackToDashboard }) => {
     <div className="min-h-screen bg-background flex flex-col font-sans pb-16">
       {/* Top Banner Navigation Bar */}
       <div className="bg-surface border-b border-border sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={onBackToDashboard}
@@ -352,7 +352,7 @@ export const ExpenseHistoryPage = ({ onBackToDashboard }) => {
       </div>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* 1. Executive Analytics KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

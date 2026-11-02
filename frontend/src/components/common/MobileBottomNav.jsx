@@ -21,8 +21,8 @@ export const MobileBottomNav = ({
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
-      className="fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border md:hidden shadow-lg transition-transform"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}
+      className="fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border md:hidden shadow-lg transition-transform pb-safe"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }}
     >
       <div className="flex items-center justify-around px-2 py-1.5 h-14">
         
