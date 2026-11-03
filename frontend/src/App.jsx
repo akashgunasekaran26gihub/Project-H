@@ -58,7 +58,6 @@ export function HabitTrackerApp() {
         onSelectView={(view) => setCurrentView(view)}
         onOpenAI={() => setIsAIOpen(true)}
         onOpenAddHabit={() => setIsAddOpen(true)}
-        onOpenAuth={() => setIsSettingsOpen(true)}
         onOpenZen={() => setIsZenOpen(true)}
         onOpenPricing={() => setIsPricingOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}

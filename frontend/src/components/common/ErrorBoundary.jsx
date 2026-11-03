@@ -44,12 +44,11 @@ export class ErrorBoundary extends React.Component {
               </button>
               <button
                 onClick={() => {
-                  localStorage.removeItem('habit_tracker_token');
                   window.location.reload();
                 }}
                 className="w-full py-2.5 bg-surface-muted text-text-secondary rounded-xl text-xs font-medium hover:text-text-primary border border-border transition-colors"
               >
-                Reset Session & Sign In
+                Clear Cache & Reload
               </button>
             </div>
           </div>

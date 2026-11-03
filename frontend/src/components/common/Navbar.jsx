@@ -5,7 +5,6 @@ import {
   WifiOff,
   Plus,
   User,
-  LogOut,
   CheckCircle2,
   Wind,
   Trophy,
@@ -27,14 +26,13 @@ export const Navbar = ({
   onSelectView,
   onOpenAI,
   onOpenAddHabit,
-  onOpenAuth,
   onOpenZen,
   onOpenPricing,
   onOpenSettings,
   onOpenShare,
   onScrollToAchievements,
 }) => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { isOffline, offlineQueueCount } = useHabits();
   const { levelInfo } = useGamification();
   const toast = useToast();
