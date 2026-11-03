@@ -6,6 +6,7 @@
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Project H" />
@@ -21,9 +22,43 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
+      // Automatic stale-cache recovery to prevent white screens if script bundles update
+      window.addEventListener('error', (event) => {
+        if (event && event.target && (event.target.tagName === 'SCRIPT' || event.target.tagName === 'LINK')) {
+          console.warn('Resource load failed, checking for service worker cache update:', event.target.src || event.target.href);
+          if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_recovered')) {
+            sessionStorage.setItem('sw_recovered', 'true');
+            navigator.serviceWorker.getRegistrations().then((regs) => {
+              for (const reg of regs) reg.unregister();
+              if ('caches' in window) {
+                caches.keys().then((keys) => {
+                  Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                    window.location.reload();
+                  });
+                });
+              } else {
+                window.location.reload();
+              }
+            });
+          }
+        }
+      }, true);
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            reg.onupdatefound = () => {
+              const installing = reg.installing;
+              if (installing) {
+                installing.onstatechange = () => {
+                  if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Auto-reload to immediately activate updated app version
+                    window.location.reload();
+                  }
+                };
+              }
+            };
+          }).catch((err) => {
             console.log('SW registration note:', err);
           });
         });

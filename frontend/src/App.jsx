@@ -11,7 +11,6 @@ import LifetimeStatsSection from './components/dashboard/LifetimeStatsSection';
 import AddHabitModal from './components/habits/AddHabitModal';
 import EditHabitModal from './components/habits/EditHabitModal';
 import AIAssistantDrawer from './components/ai/AIAssistantDrawer';
-import AuthModal from './components/auth/AuthModal';
 import ZenZoneModal from './components/zen/ZenZoneModal';
 import PricingModal from './components/saas/PricingModal';
 import SettingsModal from './components/saas/SettingsModal';
@@ -19,17 +18,12 @@ import ShareModal from './components/saas/ShareModal';
 import ExpenseTrackerSection from './components/expenses/ExpenseTrackerSection';
 import ExpenseHistoryPage from './components/expenses/ExpenseHistoryPage';
 import MobileBottomNav from './components/common/MobileBottomNav';
-import AuthScreen from './components/auth/AuthScreen';
-import { useHabits } from './context/HabitContext';
-import { useAuth } from './context/AuthContext';
 
 export function HabitTrackerApp() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
   const [currentView, setCurrentView] = useState('tracker'); // 'tracker' or 'expenses'
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [isAIOpen, setIsAIOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isZenOpen, setIsZenOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -56,19 +50,6 @@ export function HabitTrackerApp() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-9 h-9 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-xs text-text-secondary font-medium">Loading your consistency dashboard...</p>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthScreen />;
-  }
-
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Top Navbar */}
@@ -77,7 +58,7 @@ export function HabitTrackerApp() {
         onSelectView={(view) => setCurrentView(view)}
         onOpenAI={() => setIsAIOpen(true)}
         onOpenAddHabit={() => setIsAddOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenAuth={() => setIsSettingsOpen(true)}
         onOpenZen={() => setIsZenOpen(true)}
         onOpenPricing={() => setIsPricingOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -142,7 +123,7 @@ export function HabitTrackerApp() {
       {/* Footer */}
       <footer className="border-t border-border bg-surface py-6 pb-24 md:pb-6 text-center text-xs text-text-secondary">
         <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Project H Pro • Built for high consistency & behavioral momentum</span>
+          <span>Project H • Built for high consistency & behavioral momentum</span>
           <div className="flex items-center gap-3">
             <button onClick={() => setCurrentView('tracker')} className={`hover:text-text-primary ${currentView === 'tracker' ? 'font-bold text-text-primary' : ''}`}>Tracker</button>
             <span>•</span>
@@ -189,11 +170,6 @@ export function HabitTrackerApp() {
       <AIAssistantDrawer
         isOpen={isAIOpen}
         onClose={() => setIsAIOpen(false)}
-      />
-
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
       />
 
       <ZenZoneModal

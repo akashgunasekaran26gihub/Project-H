@@ -1,70 +1,47 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../services/api';
+import React, { createContext, useContext, useState } from 'react';
+import { DEFAULT_USER } from '../services/storage';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('habit_tracker_token') || null);
-  const [loading, setLoading] = useState(true);
+  // Always authenticated - login requirement removed
+  const [user, setUser] = useState(DEFAULT_USER);
+  const [token] = useState('active-session');
+  const [loading] = useState(false);
 
-  // Check auth state on mount
-  useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = localStorage.getItem('habit_tracker_token');
-      if (storedToken) {
-        try {
-          const res = await api.getMe();
-          setUser(res.user);
-          setToken(storedToken);
-        } catch (e) {
-          console.warn('Stored session invalid or expired, resetting auth');
-          localStorage.removeItem('habit_tracker_token');
-          setUser(null);
-          setToken(null);
-        }
-      } else {
-        setUser(null);
-        setToken(null);
-      }
-      setLoading(false);
-    };
-
-    initAuth();
-  }, []);
-
-  const login = async (email, password) => {
-    const res = await api.login(email, password);
-    localStorage.setItem('habit_tracker_token', res.token);
-    setToken(res.token);
-    setUser(res.user);
-    return res.user;
+  const login = async (email) => {
+    const updated = { ...DEFAULT_USER, email: email || DEFAULT_USER.email };
+    setUser(updated);
+    return updated;
   };
 
-  const register = async (name, email, password) => {
-    const res = await api.register(name, email, password);
-    localStorage.setItem('habit_tracker_token', res.token);
-    setToken(res.token);
-    setUser(res.user);
-    return res.user;
+  const register = async (name, email) => {
+    const updated = {
+      ...DEFAULT_USER,
+      name: name || DEFAULT_USER.name,
+      email: email || DEFAULT_USER.email,
+    };
+    setUser(updated);
+    return updated;
   };
 
   const logout = () => {
-    localStorage.removeItem('habit_tracker_token');
-    setToken(null);
-    setUser(null);
+    // Keep user state accessible with clean guest identity
+    setUser(DEFAULT_USER);
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      loading,
-      isAuthenticated: !!user,
-      login,
-      register,
-      logout,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated: true, // Always true to bypass auth barrier
+        login,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -77,3 +54,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

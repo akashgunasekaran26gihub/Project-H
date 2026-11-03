@@ -3,32 +3,43 @@ import prisma from '../config/db.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'habit-tracker-super-secret-jwt-key-2026';
 
+const DEFAULT_GUEST_USER = {
+  id: 'default-user',
+  name: 'Habit Champion',
+  email: 'champion@project-h.app',
+  timezone: 'UTC',
+};
+
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authentication required: No token provided' });
+      // Default guest bypass - no login required
+      req.user = DEFAULT_GUEST_USER;
+      return next();
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    // Optional user validation
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, name: true, email: true, timezone: true }
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: 'User account not found' });
+    if (token === 'local-token-active' || token === 'active-session') {
+      req.user = DEFAULT_GUEST_USER;
+      return next();
     }
 
-    req.user = user;
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, name: true, email: true, timezone: true },
+      });
+
+      req.user = user || DEFAULT_GUEST_USER;
+    } catch {
+      req.user = DEFAULT_GUEST_USER;
+    }
+
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Session expired, please log in again' });
-    }
-    return res.status(401).json({ message: 'Invalid authentication token' });
+    req.user = DEFAULT_GUEST_USER;
+    next();
   }
 };

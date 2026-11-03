@@ -209,36 +209,19 @@ export const Navbar = ({
             <Sliders className="w-4 h-4" />
           </button>
 
-          {/* User profile / Auth */}
-          {isAuthenticated ? (
-            <div className="flex items-center gap-2 pl-1 border-l border-border">
-              <div
-                onClick={onOpenSettings}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center border border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors"
-                title={user?.email}
-              >
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </div>
-              <button
-                onClick={() => {
-                  logout();
-                  toast.info('Signed out of Project H.');
-                }}
-                title="Log out"
-                className="p-1.5 text-text-secondary hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors hidden sm:block cursor-pointer"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
+          {/* User profile / Settings */}
+          <div className="flex items-center gap-2 pl-1 border-l border-border">
             <button
-              onClick={onOpenAuth}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-text-primary hover:bg-surface-muted transition-colors"
+              onClick={onOpenSettings}
+              className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-200 cursor-pointer transition-colors"
+              title="Open Settings & Data"
             >
-              <User className="w-3.5 h-3.5" />
-              <span>Log in</span>
+              <div className="w-6 h-6 rounded-full bg-slate-900 text-white font-extrabold text-[10px] flex items-center justify-center">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+              </div>
+              <span className="hidden xl:inline">{user?.name || 'Habit Champion'}</span>
             </button>
-          )}
+          </div>
 
         </div>
 
@@ -358,41 +341,26 @@ export const Navbar = ({
             </button>
           </div>
 
-          {/* User profile / Logout */}
+          {/* User profile / Settings in Mobile Drawer */}
           <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-            {isAuthenticated ? (
-              <>
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-800 font-bold flex items-center justify-center text-xs">
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <span className="font-semibold text-slate-800 truncate text-[11px]">
-                    {user?.email}
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="text-rose-600 font-bold hover:underline flex items-center gap-1"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Log out</span>
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAuth();
-                }}
-                className="w-full py-2 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-1.5"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Log in / Sign up</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+              </div>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 truncate text-[11px]">
+                {user?.name || 'Habit Champion'}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenSettings();
+              }}
+              className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Settings</span>
+            </button>
           </div>
         </div>
       )}

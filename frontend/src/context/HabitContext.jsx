@@ -2,26 +2,39 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import confetti from 'canvas-confetti';
 import { api, syncOfflineActions, getOfflineQueue } from '../services/api';
 import { playSound } from '../utils/soundEffects';
-import { useAuth } from './AuthContext';
 
 const HabitContext = createContext(null);
 
 export const HabitProvider = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-
-  // Default to real-time current date
+  // Restore active year & month from storage or real-time date
+  const initialDate = api.getActiveDate();
   const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYearState] = useState(initialDate?.year || now.getFullYear());
+  const [month, setMonthState] = useState(initialDate?.month || now.getMonth() + 1);
+
+  const updateYearMonth = (newYear, newMonth) => {
+    setYearState(newYear);
+    setMonthState(newMonth);
+    api.setActiveDate(newYear, newMonth);
+  };
 
   const jumpToToday = () => {
     const today = new Date();
-    setYear(today.getFullYear());
-    setMonth(today.getMonth() + 1);
+    updateYearMonth(today.getFullYear(), today.getMonth() + 1);
   };
 
   // Core Data States
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState(() => {
+    // Synchronous immediate bootstrap to prevent loading flashes
+    try {
+      const res = api.getDashboard(year, month);
+      // If it's a promise (async), wait for loadData
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
   const [lifetimeData, setLifetimeData] = useState(null);
   const [trendsData, setTrendsData] = useState(null);
   const [insightsData, setInsightsData] = useState([]);
@@ -33,18 +46,16 @@ export const HabitProvider = ({ children }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [offlineQueueCount, setOfflineQueueCount] = useState(0);
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'active', 'archived', 'category'
+  const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Track online/offline status & auto-sync
+  // Track online/offline status
   useEffect(() => {
     const handleOnline = async () => {
       setIsOffline(false);
-      const res = await syncOfflineActions();
+      await syncOfflineActions();
       setOfflineQueueCount(0);
-      if (res.synced > 0) {
-        refreshDashboard();
-      }
+      refreshDashboard();
     };
     const handleOffline = () => {
       setIsOffline(true);
@@ -53,7 +64,6 @@ export const HabitProvider = ({ children }) => {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
     setOfflineQueueCount(getOfflineQueue().length);
 
     return () => {
@@ -64,8 +74,7 @@ export const HabitProvider = ({ children }) => {
 
   // Fetch Dashboard and Analytics
   const loadData = useCallback(async (showLoading = true) => {
-    if (!isAuthenticated) return;
-    if (showLoading) setLoading(true);
+    if (showLoading && !dashboardData) setLoading(true);
     else setRefreshing(true);
 
     try {
@@ -90,7 +99,7 @@ export const HabitProvider = ({ children }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [isAuthenticated, year, month]);
+  }, [year, month]);
 
   useEffect(() => {
     loadData(true);
@@ -101,81 +110,40 @@ export const HabitProvider = ({ children }) => {
   // Month navigation
   const nextMonth = () => {
     if (month === 12) {
-      setMonth(1);
-      setYear(prev => prev + 1);
+      updateYearMonth(year + 1, 1);
     } else {
-      setMonth(prev => prev + 1);
+      updateYearMonth(year, month + 1);
     }
   };
 
   const prevMonth = () => {
     if (month === 1) {
-      setMonth(12);
-      setYear(prev => prev - 1);
+      updateYearMonth(year - 1, 12);
     } else {
-      setMonth(prev => prev - 1);
+      updateYearMonth(year, month - 1);
     }
   };
 
   const setMonthAndYear = (newYear, newMonth) => {
-    setYear(newYear);
-    setMonth(newMonth);
+    updateYearMonth(newYear, newMonth);
   };
 
-  // Optimistic Cell Toggle
+  // Cell Toggle: Completed (✓) -> Partial (◐) -> Missed (✕) -> Unmarked (○)
   const toggleCell = async (habitId, date, currentStatus) => {
-    // Next state cycle: unmarked -> completed -> partial -> missed -> unmarked
     let nextStatus = 'completed';
     if (currentStatus === 'completed') nextStatus = 'partial';
     else if (currentStatus === 'partial') nextStatus = 'missed';
     else if (currentStatus === 'missed') nextStatus = 'unmarked';
     else nextStatus = 'completed';
 
-    const dayNum = parseInt(date.split('-')[2], 10);
-
-    // Apply Optimistic Update locally
-    setDashboardData((prev) => {
-      if (!prev) return prev;
-      const updatedHabits = prev.habits.map((h) => {
-        if (h.id !== habitId) return h;
-        const oldCell = h.days[dayNum] || { status: 'unmarked' };
-        const newDays = {
-          ...h.days,
-          [dayNum]: { ...oldCell, date, status: nextStatus },
-        };
-
-        // Recalculate completedCount for this habit
-        let completedCount = 0;
-        let partialCount = 0;
-        Object.values(newDays).forEach((c) => {
-          if (c.status === 'completed') completedCount++;
-          if (c.status === 'partial') partialCount++;
-        });
-
-        const monthlyRate = Math.min(100, Math.round(((completedCount + (partialCount * 0.5)) / prev.daysInMonth) * 100));
-
-        return {
-          ...h,
-          days: newDays,
-          completedCount,
-          partialCount,
-          monthlyRate,
-        };
-      });
-
-      // Recalculate overall progress
-      const totalCompleted = updatedHabits.reduce((acc, h) => acc + h.completedCount, 0);
-      const totalPotential = (updatedHabits.filter(h => h.active).length || 1) * prev.daysInMonth;
-      const overallProgress = Math.min(100, Math.round((totalCompleted / totalPotential) * 100));
-
-      return {
-        ...prev,
-        habits: updatedHabits,
-        overallProgress,
-      };
+    // 1. Immediately persist to localStorage
+    await api.toggleCompletion({
+      habitId,
+      date,
+      status: nextStatus,
     });
 
-    // Confetti celebration & audio chime if completing a habit
+    // 2. Play Audio & Confetti celebration
     if (nextStatus === 'completed') {
       playSound('check', true);
       confetti({
@@ -189,20 +157,8 @@ export const HabitProvider = ({ children }) => {
       playSound('click', true);
     }
 
-    try {
-      await api.toggleCompletion({
-        habitId,
-        date,
-        status: nextStatus,
-      });
-      if (isOffline) {
-        setOfflineQueueCount(getOfflineQueue().length);
-      }
-    } catch (err) {
-      console.error('Error toggling completion:', err);
-      // Revert if error
-      refreshDashboard();
-    }
+    // 3. Immediately refresh metrics
+    await refreshDashboard();
   };
 
   // Habit CRUD Actions
@@ -228,13 +184,11 @@ export const HabitProvider = ({ children }) => {
     await refreshDashboard();
   };
 
-  // Reorder
   const reorderHabits = async (orderedIds) => {
     await api.reorderHabits(orderedIds);
     await refreshDashboard();
   };
 
-  // Seed 3 Starter Habits for fresh new users
   const seedStarterHabits = async () => {
     setLoading(true);
     try {
@@ -266,6 +220,15 @@ export const HabitProvider = ({ children }) => {
           frequency: 'daily',
           preferredTime: 'morning',
         },
+        {
+          name: 'Deep Work Session',
+          category: 'Productivity',
+          target: 2,
+          unit: 'hours',
+          color: '#d97706',
+          frequency: 'daily',
+          preferredTime: 'morning',
+        },
       ];
 
       for (const h of starters) {
@@ -280,38 +243,40 @@ export const HabitProvider = ({ children }) => {
   };
 
   return (
-    <HabitContext.Provider value={{
-      year,
-      month,
-      setYear,
-      setMonth,
-      setMonthAndYear,
-      nextMonth,
-      prevMonth,
-      jumpToToday,
-      seedStarterHabits,
-      dashboardData,
-      lifetimeData,
-      trendsData,
-      insightsData,
-      dailySummary,
-      weeklySummary,
-      loading,
-      refreshing,
-      refreshDashboard,
-      toggleCell,
-      createHabit,
-      updateHabit,
-      deleteHabit,
-      toggleArchiveHabit,
-      reorderHabits,
-      isOffline,
-      offlineQueueCount,
-      activeFilter,
-      setActiveFilter,
-      searchQuery,
-      setSearchQuery,
-    }}>
+    <HabitContext.Provider
+      value={{
+        year,
+        month,
+        setYear: (y) => updateYearMonth(y, month),
+        setMonth: (m) => updateYearMonth(year, m),
+        setMonthAndYear,
+        nextMonth,
+        prevMonth,
+        jumpToToday,
+        seedStarterHabits,
+        dashboardData,
+        lifetimeData,
+        trendsData,
+        insightsData,
+        dailySummary,
+        weeklySummary,
+        loading,
+        refreshing,
+        refreshDashboard,
+        toggleCell,
+        createHabit,
+        updateHabit,
+        deleteHabit,
+        toggleArchiveHabit,
+        reorderHabits,
+        isOffline,
+        offlineQueueCount,
+        activeFilter,
+        setActiveFilter,
+        searchQuery,
+        setSearchQuery,
+      }}
+    >
       {children}
     </HabitContext.Provider>
   );
@@ -324,3 +289,5 @@ export const useHabits = () => {
   }
   return context;
 };
+
+export default HabitContext;

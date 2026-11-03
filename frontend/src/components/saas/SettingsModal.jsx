@@ -96,9 +96,10 @@ export const SettingsModal = ({ isOpen, onClose }) => {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed && (parsed.habits || parsed.daysInMonth)) {
-          toast.success('Backup archive verified successfully! Reloading metrics.');
+        if (parsed && (parsed.habits || parsed.daysInMonth || parsed.completions)) {
+          api.importBackup(parsed);
           refreshDashboard();
+          toast.success('Backup archive verified and restored successfully! Reloading metrics.');
         } else {
           toast.warning('File format recognized, but no habits found.');
         }
@@ -121,11 +122,11 @@ export const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleConfirmLogout = () => {
+  const handleResetData = async () => {
     setIsLogoutConfirmOpen(false);
-    logout();
-    onClose();
-    toast.info('You have been signed out.');
+    api.resetData();
+    await refreshDashboard();
+    toast.info('Tracker data reset to clean starter habits.');
   };
 
   return (
@@ -323,28 +324,28 @@ export const SettingsModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Tab 3: Account Profile */}
+          {/* Tab 3: Account Profile & Data Management */}
           {activeTab === 'account' && (
             <div className="space-y-3.5 text-xs animate-in fade-in">
               <div className="p-3.5 rounded-2xl bg-surface-muted/60 border border-border space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-indigo-600 text-white font-extrabold flex items-center justify-center text-sm shadow-xs">
-                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                    {user?.name?.[0]?.toUpperCase() || 'C'}
                   </div>
                   <div>
                     <div className="font-extrabold text-sm text-text-primary">
-                      {user?.name || 'Authorized Member'}
+                      {user?.name || 'Habit Champion'}
                     </div>
                     <div className="text-[11px] text-text-secondary">
-                      {user?.email || 'user@example.com'}
+                      {user?.email || 'champion@project-h.app'}
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-border flex items-center justify-between">
-                  <span className="text-[11px] text-text-secondary">Current Plan:</span>
-                  <span className="font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800 text-[10px]">
-                    Pro Member (Full Suite)
+                  <span className="text-[11px] text-text-secondary">Local Persistence:</span>
+                  <span className="font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 text-[10px]">
+                    100% Offline Ready
                   </span>
                 </div>
               </div>
@@ -354,8 +355,8 @@ export const SettingsModal = ({ isOpen, onClose }) => {
                 onClick={() => setIsLogoutConfirmOpen(true)}
                 className="w-full py-2.5 px-3 rounded-2xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-bold hover:bg-rose-100 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out of Project H</span>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset to Default Starter Habits</span>
               </button>
             </div>
           )}
@@ -376,19 +377,19 @@ export const SettingsModal = ({ isOpen, onClose }) => {
         onClose={() => setIsResetConfirmOpen(false)}
         onConfirm={handleSeedStarters}
         title="Add Starter Habits?"
-        message="This will add 3 core curated habits (Exercise, Deep Work, Reading) to your consistency dashboard."
+        message="This will add core curated habits (Water, Exercise, Deep Work, Reading) to your consistency dashboard."
         confirmText="Add Habits"
         variant="primary"
       />
 
-      {/* Confirmation Modal for Logout */}
+      {/* Confirmation Modal for Resetting All Data */}
       <ConfirmationModal
         isOpen={isLogoutConfirmOpen}
         onClose={() => setIsLogoutConfirmOpen(false)}
-        onConfirm={handleConfirmLogout}
-        title="Sign Out?"
-        message="You will need to sign in again to access your habits and offline synchronization queue."
-        confirmText="Sign Out"
+        onConfirm={handleResetData}
+        title="Reset Tracker to Clean State?"
+        message="This will reset your habits to the initial starter templates. Make sure to export a JSON backup first if you want to keep your logs!"
+        confirmText="Reset Habits"
         variant="danger"
       />
     </>

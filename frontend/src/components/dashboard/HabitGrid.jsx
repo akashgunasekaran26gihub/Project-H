@@ -394,9 +394,11 @@ export const HabitGrid = ({ onOpenAddHabit, onOpenEditHabit }) => {
                 <th colSpan={7} className={`py-1 border-r border-border ${WEEK_COLORS[4].header}`}>
                   WEEK 4 (Days 22–28)
                 </th>
-                <th colSpan={daysInMonth - 28} className={`py-1 border-r border-border ${WEEK_COLORS[5].header}`}>
-                  WEEK 5 (Days 29–{daysInMonth})
-                </th>
+                {daysInMonth > 28 && (
+                  <th colSpan={daysInMonth - 28} className={`py-1 border-r border-border ${WEEK_COLORS[5].header}`}>
+                    WEEK 5 (Days 29–{daysInMonth})
+                  </th>
+                )}
                 <th className="px-2.5 sm:px-3 py-1 bg-surface font-bold text-text-secondary min-w-[70px] sm:min-w-[80px]">
                   TOTAL
                 </th>
