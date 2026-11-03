@@ -10,17 +10,46 @@ const DEFAULT_GUEST_USER = {
   timezone: 'UTC',
 };
 
+// Ensure default user row exists in SQLite so foreign key relations (userId) succeed
+let defaultUserCreated = false;
+async function ensureDefaultUserInDb() {
+  if (defaultUserCreated) return;
+  try {
+    const existing = await prisma.user.findUnique({
+      where: { id: DEFAULT_GUEST_USER.id },
+    });
+    if (!existing) {
+      await prisma.user.upsert({
+        where: { id: DEFAULT_GUEST_USER.id },
+        update: {},
+        create: {
+          id: DEFAULT_GUEST_USER.id,
+          name: DEFAULT_GUEST_USER.name,
+          email: DEFAULT_GUEST_USER.email,
+          passwordHash: 'guest-no-password-hash',
+          timezone: DEFAULT_GUEST_USER.timezone,
+        },
+      });
+    }
+    defaultUserCreated = true;
+  } catch (err) {
+    // If DB is temporarily locked or offline, ignore
+  }
+}
+
 export const authenticate = async (req, res, next) => {
   try {
+    await ensureDefaultUserInDb();
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // Default guest bypass - no login required
+      // Auto-authenticate as default guest user
       req.user = DEFAULT_GUEST_USER;
       return next();
     }
 
     const token = authHeader.split(' ')[1];
-    if (token === 'local-token-active' || token === 'active-session') {
+    if (!token || token === 'null' || token === 'undefined' || token === 'local-token-active' || token === 'active-session') {
       req.user = DEFAULT_GUEST_USER;
       return next();
     }
@@ -31,7 +60,6 @@ export const authenticate = async (req, res, next) => {
         where: { id: decoded.id },
         select: { id: true, name: true, email: true, timezone: true },
       });
-
       req.user = user || DEFAULT_GUEST_USER;
     } catch {
       req.user = DEFAULT_GUEST_USER;
@@ -43,3 +71,5 @@ export const authenticate = async (req, res, next) => {
     next();
   }
 };
+
+export default authenticate;
