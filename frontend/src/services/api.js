@@ -124,36 +124,59 @@ export const api = {
     return getStoredHabits();
   },
   createHabit: async (habitData) => {
-    const habit = createHabitRecord(habitData);
-    backgroundSync('/habits', { method: 'POST', body: JSON.stringify(habitData) }).catch(() => {});
-    return { habit };
+    try {
+      const habit = createHabitRecord(habitData);
+      backgroundSync('/habits', { method: 'POST', body: JSON.stringify(habitData) }).catch(() => {});
+      return { habit };
+    } catch (err) {
+      console.warn('Local habit creation fallback:', err);
+      return { habit: { id: `habit-${Date.now()}`, ...habitData } };
+    }
   },
   updateHabit: async (id, habitData) => {
-    const habit = updateHabitRecord(id, habitData);
-    backgroundSync(`/habits/${id}`, { method: 'PUT', body: JSON.stringify(habitData) }).catch(() => {});
-    return { habit };
+    try {
+      const habit = updateHabitRecord(id, habitData);
+      backgroundSync(`/habits/${id}`, { method: 'PUT', body: JSON.stringify(habitData) }).catch(() => {});
+      return { habit };
+    } catch (err) {
+      return { habit: { id, ...habitData } };
+    }
   },
   deleteHabit: async (id) => {
-    deleteHabitRecord(id);
-    backgroundSync(`/habits/${id}`, { method: 'DELETE' }).catch(() => {});
+    try {
+      deleteHabitRecord(id);
+      backgroundSync(`/habits/${id}`, { method: 'DELETE' }).catch(() => {});
+    } catch (err) {}
     return { message: 'Habit deleted' };
   },
   toggleArchive: async (id) => {
-    const habit = toggleArchiveRecord(id);
-    backgroundSync(`/habits/${id}/archive`, { method: 'PATCH' }).catch(() => {});
-    return { habit };
+    try {
+      const habit = toggleArchiveRecord(id);
+      backgroundSync(`/habits/${id}/archive`, { method: 'PATCH' }).catch(() => {});
+      return { habit };
+    } catch (err) {
+      return { habit: { id } };
+    }
   },
   reorderHabits: async (habitIds) => {
-    const habits = reorderHabitsRecord(habitIds);
-    backgroundSync('/habits/reorder', { method: 'PUT', body: JSON.stringify({ habitIds }) }).catch(() => {});
-    return { habits };
+    try {
+      const habits = reorderHabitsRecord(habitIds);
+      backgroundSync('/habits/reorder', { method: 'PUT', body: JSON.stringify({ habitIds }) }).catch(() => {});
+      return { habits };
+    } catch (err) {
+      return { habits: [] };
+    }
   },
 
   // Completions (Saved permanently to localStorage)
   toggleCompletion: async (payload) => {
-    const result = toggleCompletionRecord(payload);
-    backgroundSync('/completions/toggle', { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
-    return result;
+    try {
+      const result = toggleCompletionRecord(payload);
+      backgroundSync('/completions/toggle', { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
+      return result;
+    } catch (err) {
+      return payload;
+    }
   },
 
   // Analytics

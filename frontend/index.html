@@ -47,6 +47,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then((reg) => {
+            reg.update(); // Promptly check for service worker updates
             reg.onupdatefound = () => {
               const installing = reg.installing;
               if (installing) {

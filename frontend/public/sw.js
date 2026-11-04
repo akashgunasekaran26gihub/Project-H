@@ -1,5 +1,5 @@
-// AI Habit Tracker Service Worker (v3 - Network First & Offline-Ready)
-const CACHE_NAME = 'habit-tracker-v3';
+// AI Habit Tracker Service Worker (v4 - Force Cache Purge & Offline-Ready)
+const CACHE_NAME = 'habit-tracker-v4';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -17,7 +17,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('Purging old service worker cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
     })
   );
@@ -59,7 +64,6 @@ self.addEventListener('fetch', (event) => {
       }
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
-          // Do not cache opaque error responses or html for scripts
           const isScript = event.request.url.endsWith('.js');
           const contentType = networkResponse.headers.get('content-type') || '';
           if (!isScript || !contentType.includes('text/html')) {
